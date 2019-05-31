@@ -1,0 +1,29 @@
+Bulbes printemps:
+
+nom:
+categorie:
+genre:
+espece:
+famille:
+couleur_fleur:
+periode_floraison: de Juin à Juil.
+taille_fleur: 7cm
+parfum: non parfumée
+persistance_feuillage
+couleur_feuillage: bleue, gris
+hauteur:
+croissance:
+plantation_optimale:
+plantation:
+profondeur_planatation: 10cm
+utilisation: massif, bac
+climat: tous
+rusticite: Rustique , Zone de rusticité USDA Zone 5, Zone 6a, Zone 7b
+densite_plantation: 4 au m²
+substrat: Sol bien drainé
+exposition:
+ph_sol: tous
+drainage_humidite: un sol frais
+arrosage: humide (humidité du sol)
+hivernage
+periode_taille

@@ -1,0 +1,38 @@
+fruitier
+
+nom:
+categorie:
+genre:
+espece:
+famille:
+origine:
+couleur_fleur:
+periode_floraison:
+inflorescence:
+taille_fleur:
+parfum:
+autofertille ?
+couleur_fruit:
+diametre_fruit:
+saveur:
+utilisation_fruit: Table, Confiture, Compote, Pâtisserie
+recolte:
+persistance_feuillage:
+couleur_feuillage:hauteur:
+envergure:
+port:
+croissance:
+plantation_optimale:
+plantation:
+utilisation: isolé, verger
+climat:
+rusticite:
+difficulte_culture:
+densite_plantation:
+substrat:
+arrosage:
+résistance maladie:
+periode_taille:
+hivernage:
+
+/!\ info taille suplémentaire

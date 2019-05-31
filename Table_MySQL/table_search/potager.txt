@@ -1,0 +1,32 @@
+potager
+
+nom,
+catégorie:
+type_legume:
+couleur_legume
+taille_legume
+interet_legume: couleur
+saveur: amère
+utilisation: alcool
+persistance_feuillage:
+couleur_feuillage:
+hauteur:
+envergure:
+croissance:
+genre:
+espece:
+famille:
+autre_noms:
+origine:
+annuelle_vivace:
+plantation_optimale: Avril à Mai, Sept. à Oct.
+plantation: Mars à Mai, Sept. à Oct.
+recolte:
+utilisation:
+climat:
+rusticite:
+difficulte_culture:
+substrat:
+exposition:
+ph_sol: tous
+!! ça va chier !! drainage_humidite: Argilo-limoneux (riche et léger), Caillouteux (pauvre et filtrant) , humidité du sol un sol sec

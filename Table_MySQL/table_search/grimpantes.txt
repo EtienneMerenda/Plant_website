@@ -1,0 +1,38 @@
+grimpantes:
+
+nom:
+categorie:
+genre:
+espece:
+famille:
+autre_noms:
+origine:
+couleur_fleur:
+periode_floraison:
+taille_fleur:
+parfum:
+persistance_feuillage:
+couleur_feuillage:
+hauteur:
+envergure:
+croissance:
+systeme_attache: Tiges volubiles
+plantation_optimale: avril
+plantation: mars à mai
+type_support: Mur, Treillage
+type_jardin: Prairie
+utilisation: isolé
+climat:
+rusticite:
+difficulte_culture:
+densite_plantation:
+substrat:
+exposition:
+ph_sol: tous
+!! ça va chier !! drainage_humidite: Argilo-limoneux (riche et léger), Caillouteux (pauvre et filtrant) , humidité du sol un sol sec
+arrosage:
+résistance maladie:
+hivernage:
+periode_taille:
+
+soin texte seul.

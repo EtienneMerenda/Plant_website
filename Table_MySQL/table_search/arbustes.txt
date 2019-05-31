@@ -1,0 +1,37 @@
+arbustes
+
+nom:
+catégorie:
+genreAbelia
+espèce: x grandiflora
+famille: Caprifoliaceae
+origine: Horticole
+couleur_fleur:
+periode_floraison:
+inflorescence:
+taille_fleur:
+mellifere:
+persistance_feuillage
+couleur_feuillage:
+hauteur:
+envergure:
+port: Irrégulier, buissonnant
+croissance:
+plantation_optimale: avril
+plantation: mars à mai
+type_jardin: Prairie
+utilisation: isolé
+climat:
+rusticite:
+difficulte_culture:
+densite_plantation
+substrat: riche, limoneux et drainé (type sol)
+exposition:
+ph_sol: tous
+!! ça va chier !! drainage_humidite: Argilo-limoneux (riche et léger), Caillouteux (pauvre et filtrant) , humidité du sol un sol sec
+
+/!\ texte de soin
+arrosage: tolérant
+résistance maladie
+hivernage:
+periode_taille: Août à Sept.

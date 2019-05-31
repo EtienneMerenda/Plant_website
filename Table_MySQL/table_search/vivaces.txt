@@ -1,0 +1,35 @@
+Vivaces:
+
+nom:
+categorie:
+genre:
+espece:
+famille:
+origine: Méditerranée
+couleur_fleur:
+periode_floraison:  Août à Oct.
+taille_fleur:
+parfum: non parfumée
+/!\ texte: <p> Le feuillage est détruit en-dessous de -6°C </p>
+
+persistance_feuillage
+couleur_feuillage: bleue, gris
+hauteur: 200 cm
+envergure: 100 cm
+croissance: rapide
+plantation_optimale: Mars à Avril
+plantation: Mars à Juin, Sept. à Oct.
+jardin: Prairie, Berge de bassin
+utilisation: Fond de massif, Isolé, Bac, Haie
+climat: Méditerranéen
+rusticite:
+difficulte_culture:
+densite_plantation:
+substrat:
+exposition:
+ph_sol:
+drainage_humidite:
+arrosage: humide
+résistance maladie
+hivernage:
+periode_taille:

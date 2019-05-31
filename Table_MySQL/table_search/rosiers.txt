@@ -1,0 +1,36 @@
+rosiers:
+
+nom:
+categorie:
+genre:
+espece:
+famille:
+origine:
+couleur_fleur:
+periode_floraison: de Juin à Juil.
+inflorescence: Ombelle
+taille_fleur: 7cm
+fleur à bouquet ?
+parfum: non parfumée
+persistance_feuillage
+couleur_feuillage:
+hauteur:
+envergure:
+croissance:
+systeme_attache:
+plantation_optimale: avril
+plantation: mars à mai
+type_support: Arbre, Arche, Mur, Treillage
+type_jardin: Prairie
+utilisation: isolé
+climat:
+rusticite:
+difficulte_culture:
+substrat: riche, limoneux et drainé (type sol)
+exposition:
+ph_sol: tous
+!! ça va chier !! drainage_humidite: Argilo-limoneux (riche et léger), Caillouteux (pauvre et filtrant) , humidité du sol un sol sec
+arrosage: tolérant
+résistance maladie
+hivernage:
+periode_taille: Mars
