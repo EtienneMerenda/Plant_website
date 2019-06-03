@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 
 import mysql.connector
+import json
+from pprint import pprint
 
 
 class MySQLAdministrator:
@@ -8,11 +10,16 @@ class MySQLAdministrator:
 
     def __init__(self):
         self.mydb = None
-        self.mycursor = None
+        self.myCursor = None
         self.dataBaseList = []
         self.TableList = []
 
-    def connection(self, host="localhost", user="", password="", db=None):
+        with open("sqlHelper.json", "r", encoding="utf-8") as file:
+            self.sqlHelper = json.loads(file.read())
+            print(self.sqlHelper)
+
+
+    def link(self, user, password, host="localhost", db=None):
         """Method used to connect to the database."""
 
         self.mydb = mysql.connector.connect(host=host,
@@ -24,7 +31,16 @@ class MySQLAdministrator:
     def createDB(self, namedb):
         """Method used to create a new database."""
 
-        self.myCursor.execute(f"CREATE DATABASE {namedb}")
+        print(self.checkDB())
+        if namedb not in self.checkDB():
+            self.myCursor.execute(f"CREATE DATABASE {namedb};")
+        else:
+            r = ""
+            while r not in ["n", "y"]:
+                r = input("Database already exist, do you want drop it ? y/n ")
+            if r == "y":
+                self.myCursor.execute(f"DROP DATABASE {namedb};")
+                self.myCursor.execute(f"CREATE DATABASE {namedb};")
 
     def checkDB(self):
         """Method used to check existing database."""
@@ -32,26 +48,26 @@ class MySQLAdministrator:
         self.myCursor.execute("SHOW DATABASES")
 
         for dataBase in self.myCursor:
-            print(dataBase)
-            if self.dataBaseList.count(dataBase) == 0:
-                self.dataBaseList.append(dataBase)
+            print(dataBase[0])
+            if self.dataBaseList.count(dataBase[0]) == 0:
+                self.dataBaseList.append(dataBase[0])
 
         return self.dataBaseList
 
 # ------------------------------------------------------------------------------
 
-    def createTable(self, name="Default", primaryKey=None, id="key"):
+    def createTable(self, name, type, primaryKey=None, id="key"):
         """Method used to create a new tab."""
 
         if primaryKey is True:
-            self.myCursor.execute(f"ALTER TABLE {name} ADD COLUMN {id} INT AUTO_INCREMENT PRIMARY KEY")
+            self.myCursor.execute(f"CREATE TABLE IF NOT EXISTS {name} ({id} INT"
+            f" UNSIGNED AUTO_INCREMENT PRIMARY KEY, {name} ")
 
         else:
             self.myCursor.execute(f"CREATE TABLE {name} (name VARCHAR(255),"
                               "address VARCHAR(255))")
 
         #  Primary Key with auto incrementation if primaryKey is True.
-
 
     def checkTable(self):
         """Method used to check existing tables."""
@@ -83,3 +99,6 @@ class MySQLAdministrator:
     def checkRows(self):
 
         self.mysCursor.execute("")
+
+
+sql = MySQLAdministrator()

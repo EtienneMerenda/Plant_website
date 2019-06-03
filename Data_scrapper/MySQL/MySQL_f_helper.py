@@ -1,5 +1,7 @@
 # -*- encoding: utf-8 -*-
 
+import json
+
 type_MySQL_help = {"Integral":
                     {"BIT[(M)]": "A bit-value type. M indicates the number of bits per value, from 1 to 64. The default is 1 if M is omitted",
 
@@ -90,7 +92,7 @@ integralList = []
 dateList = []
 StringList = []
 
-# Création de listes pour créé le .csv
+# Création de listes pour créer le .csv
 
 for keys, values in type_MySQL_help.items():
     for key, value in values.items():
@@ -137,13 +139,11 @@ for items in StringList:
 
 print(StringList)
 
-with open("TypeMySQL_Col.csv", "w", encoding="utf-8") as file:
-    file.write("Integer Type\n")
-    for items in integralList:
-        file.write(";".join(items)+"\n")
-    file.write("Date and Time Type\n")
-    for items in dateList:
-        file.write(";".join(items)+"\n")
-    file.write("String Type\n")
-    for items in StringList:
-        file.write(";".join(items)+"\n")
+helperDict = {"Integral": integralList,
+              "Date": dateList,
+              "String": StringList}
+
+print(helperDict)
+
+with open("sqlHelper.json", "w", encoding="utf-8") as file:
+    file.write(json.dumps(helperDict))
