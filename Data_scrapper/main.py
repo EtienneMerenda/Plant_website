@@ -28,9 +28,9 @@ class DataAdmin():
     def rosetta_stone(self):
         """Get table conversion in extenal file"""
         try:
-            with open("rosetta_stone.dic", "rb") as file:
+            with open("RS.dic", "rb") as file:
                 self.RS = pickle.load(file)
-                self.date = self.RS["__date__"]
+                self.date = self.RS["_date"]
         except EOFError:
             self.RS = {'arrosage': 'Nom_has_Arrosage',
                        'autres_noms_communs': 'Nom_has_Autre_nom',
@@ -68,9 +68,9 @@ class DataAdmin():
             self.date = {}
 
     def burn_RS(self):
-        """Save dictionary in external file called 'table_name.dic'"""
-        self.RS["__date__"] = self.date
-        with open("rosetta_stone.dic", "wb") as file:
+        """Save dictionary in external file called 'RS.dic'"""
+        self.RS["_date"] = self.date
+        with open("RS.dic", "wb") as file:
             pickle.dump(self.RS, file)
 
     def date_convert(self, date):
@@ -84,7 +84,7 @@ class DataAdmin():
         return date_list
 
     def table_convert(self, name):
-        """Check if table name is in Rosetta stone"""
+        """Check if table name is in Rosetta Stone"""
         if name in self.RS["ignored"]:
             pass
         elif name not in self.RS.keys():
@@ -95,17 +95,20 @@ class DataAdmin():
             self.RS[key] = ref
 
     def convert(self, key):
+        """Return value of given key into rosetta stone."""
         return self.RS[key]
 
     def ignored(self):
+        """Return ignored list into RS."""
         return self.RS["ignored"]
 
     def RS_read(self):
+        """Return RS dictionary."""
         return pprint(self.RS)
 
 admin_data = DataAdmin()
 admin_data.rosetta_stone()
-r = requests.get("https://www.promessedefleurs.com/potager/plants-potagers/plants-greffes/pasteque-pata-negra-f1-en-plants.html")
+r = requests.get("https://www.promessedefleurs.com/annuelles/fleurs-annuelles-en-minimottes/annuelles-par-varietes/bidens/bidens-yellow-charm-bidens-jaune-dore.html")
 soup = BeautifulSoup(r.text, "html5lib")
 
 # I get name in tag div with product-name class and in title tag and compare them.
@@ -173,11 +176,21 @@ admin_data.RS_read()
 # MySQL Traitement -------------------------------------------------------------
 
 # Connection to MySQL with my MySQLAdministrator classe
+path = "./MySQL"
 sql = MySQLAdministrator()
-sql.link(user, password, db="test")
+sql.makeHelper("./MySQL/")
+sql.link(user, password)
 
 # Create DB for test
 sql.createDB("test")
+
+# Create table "nom" if not exist (in first scrap)
+if not sql.checkInTable("nom"):
+    sql.createTable("Nom")
+    sql.createCol("Nom", "nom", "VARCHAR(100)", "UNIQUE NOT NULL")
+
+if not sql.checkInRow(name, "nom"):
+    sql.insert("nom", name)
 
 for raw_TN, data in rafined_data.items():
     # We skip useless data: cultivar
@@ -187,10 +200,16 @@ for raw_TN, data in rafined_data.items():
             # Get the relation table name too.
             rel_tn = admin_data.convert(raw_TN)
             # Get table_name in RS dict
-            tn = rel_tn.strip("Nom_has")
-            print("PersontopersonTraitment", rel_tn, tn, sql.checkTable())
+            tn = rel_tn.replace("Nom_has_", "")
             # if the table not exist, we create it.
-            if sql.checkTable()
+            if not sql.checkInTable(tn):
+                sql.createTable(tn)
+                sql.createCol(tn, "valeur", "VARCHAR(100)")
+                sql.insert(tn, data)
+                sql.createRelTable("Nom", tn)
+
+            else:
+                sql.insert(tn, data)
         elif "Date" in admin_data.convert(raw_TN):
             print("DateTraitment")
         elif "Couleur" in admin_data.convert(raw_TN):
