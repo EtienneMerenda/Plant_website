@@ -14,6 +14,7 @@ class MySQLAdministrator:
         self.myCursor = None
         self.dataBaseList = []
         self.TableList = []
+        self.errors = mysql.connector.errors
 
     def makeHelper(self, path):
         """Need to give the MySQL folder path to create sqlHelper."""
@@ -59,6 +60,10 @@ class MySQLAdministrator:
                 self.dataBaseList.append(dataBase[0])
 
         return self.dataBaseList
+
+    def useDB(self, namedb):
+        self.myCursor.execute(f"USE {namedb};")
+        self.dbName = namedb
 
 # ------------------------------------------------------------------------------
 
