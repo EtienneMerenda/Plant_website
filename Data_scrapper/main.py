@@ -182,37 +182,201 @@ sql.makeHelper("./MySQL/")
 sql.link(user, password)
 
 # Create DB for test
-sql.createDB("test")
+sql.createDB("Plants")
 
 # Create table "nom" if not exist (in first scrap)
-if not sql.checkInTable("nom"):
-    sql.createTable("Nom")
-    sql.createCol("Nom", "nom", "VARCHAR(100)", "UNIQUE NOT NULL")
+if not sql.inTable("nom"):
+    sql.createTable("nom")
+    sql.createCol("nom", "nom", "VARCHAR(100)", "UNIQUE NOT NULL")
 
-if not sql.checkInRow(name, "nom"):
+if not sql.inRow("nom", name):
     sql.insert("nom", name)
 
 for raw_TN, data in rafined_data.items():
+
     # We skip useless data: cultivar
     if raw_TN not in admin_data.ignored():
+
+        print("\n", raw_TN, admin_data.convert(raw_TN), data, "\n")
+
         # We work in Name to other table multi-relations.
         if "Nom_has" in admin_data.convert(raw_TN):
+
             # Get the relation table name too.
-            rel_tn = admin_data.convert(raw_TN)
+            rel_tn = admin_data.convert(raw_TN).lower()
             # Get table_name in RS dict
-            tn = rel_tn.replace("Nom_has_", "")
+            tn = rel_tn.replace("nom_has_", "")
+
             # if the table not exist, we create it.
-            if not sql.checkInTable(tn):
+            if not sql.inTable(tn):
                 sql.createTable(tn)
                 sql.createCol(tn, "valeur", "VARCHAR(100)")
-                sql.insert(tn, data)
-                sql.createRelTable("Nom", tn)
+                sql.createRelTable("nom", tn)
 
-            else:
+            # Adding value in table if not done yet.
+            # print(data)
+            # If value is list type
+            if isinstance(data, list):
+                t = []
+                # check if each value not already in table
+                for v in data:
+                    if not sql.inRow(tn, v):
+                        t.append(v)
+                # Each data not in table append in list and reaffect to data var
+                data = t
+                if len(data) > 0:
+                    sql.insert(tn, data)
+                    for value in data:
+                        sql.nnfKey("nom", name, tn, value)
+            elif not sql.inRow(tn, data):
                 sql.insert(tn, data)
+                print("nom", name, tn, data)
+                sql.nnfKey("nom", name, tn, data)
+
         elif "Date" in admin_data.convert(raw_TN):
-            print("DateTraitment")
+            # Get the relation table name too.
+            rel_tn = admin_data.convert(raw_TN).lower()
+            # Get table_name in RS dict
+            tn = "date"
+
+            print(rel_tn, tn)
+
+            # if the table not exist, we create it.
+            if not sql.inTable(tn):
+                sql.myCursor.execute(f"CREATE TABLE IF NOT EXISTS `Plants`.`Date` ( "
+                                      "`id` INT UNSIGNED NOT NULL AUTO_INCREMENT, "
+                                      "`mois` VARCHAR(45) CHARACTER SET 'utf8' COLLATE 'utf8_bin' NOT NULL, "
+                                      "PRIMARY KEY (`id`), "
+                                      "UNIQUE INDEX `id_UNIQUE` (`id` ASC) VISIBLE, "
+                                      "UNIQUE INDEX `date_UNIQUE` (`mois` ASC) VISIBLE)")
+
+            # if new date appears, we inject it.
+            pprint(admin_data.RS["_date"])
+            for k, v in admin_data.RS["_date"].items():
+                print(k, v)
+                if not sql.inRow("date", k):
+                    sql.insert("date", k)
+                    print(f"UPDATE date SET `id` = {v} WHERE `mois` = '{k}'")
+                    sql.myCursor.execute(f"UPDATE date SET `id` = {v} WHERE `mois` = '{k}'")
+
+            # Create relational table.
+            if not sql.inTable(rel_tn):
+                sql.myCursor.execute(f"CREATE TABLE IF NOT EXISTS `{rel_tn}` ("
+                                        f"`nom_id` INT UNSIGNED NOT NULL, "
+                                        f"`date_start_id` INT UNSIGNED NOT NULL, "
+                                        f"`date_end_id` INT UNSIGNED NOT NULL, "
+                                        f"PRIMARY KEY (`nom_id`, `date_start_id`, `date_end_id`), "
+                                        f"INDEX `fk_Plantation_has_Date_Date1_idx` (`date_start_id` ASC) VISIBLE, "
+                                        f"INDEX `fk_Plantation_has_Date_Date2_idx` (`date_end_id` ASC) VISIBLE, "
+                                        f"CONSTRAINT `fk_{rel_tn}_Nom1` "
+                                          f"FOREIGN KEY (`Nom_id`) "
+                                          f"REFERENCES `Plants`.`Nom` (`id`) "
+                                          f"ON DELETE NO ACTION "
+                                          f"ON UPDATE NO ACTION, "
+                                        f"CONSTRAINT `fk_{rel_tn}_Date1` "
+                                          f"FOREIGN KEY (`date_start_id`) "
+                                          f"REFERENCES `Plants`.`date` (`id`) "
+                                          f"ON DELETE NO ACTION "
+                                          f"ON UPDATE NO ACTION, "
+                                        f"CONSTRAINT `fk_{rel_tn}_Date2` "
+                                          f"FOREIGN KEY (`date_end_id`) "
+                                          f"REFERENCES `Plants`.`date` (`id`) "
+                                          f"ON DELETE NO ACTION "
+                                          f"ON UPDATE NO ACTION) "
+                                        f"ENGINE = InnoDB;")
+
+            print("after", data)
+            iP = [sql.inRow("nom", name, "k")]
+            print(iP)
+            data = (tuple(iP + data),)
+            print(data)
+
+            if len(data[0]) == 2:
+                data = ((data[0][0], data[0][1], data[0][1],),)
+
+            print(data)
+            sql.insert(rel_tn, data, ("nom_id", "date_start_id", "date_end_id"))
+            # If value is list type
+
         elif "Couleur" in admin_data.convert(raw_TN):
-            print("CouleurTraitment")
+
+            # Get the relation table name too.
+            rel_tn = admin_data.convert(raw_TN).lower()
+            # Get table_name in RS dict
+            tn = rel_tn.replace("_has_couleur", "")
+
+            # print(rel_tn, tn)
+
+            # if the table not exist, we create it.
+            if not sql.inTable(tn):
+                sql.createTable(tn)
+                sql.createCol(tn, "valeur", "VARCHAR(100)")
+
+            if not sql.inTable(rel_tn):
+                sql.createRelTable("nom", tn, rel_tn)
+
+            # Adding value in table if not done yet.
+            # print(data)
+            # If value is list type
+            if isinstance(data, list):
+                t = []
+                # check if each value not already in table
+                for v in data:
+                    if not sql.inRow(tn, v):
+                        t.append(v)
+                # Each data not in table append in list and reaffect to data var
+                data = t
+                if len(data) > 0:
+                    sql.insert(tn, data)
+                    for value in data:
+                        print("nom", name, tn, value, rel_tn)
+                        sql.nnfKey("nom", name, tn, value, rel_tn)
+            elif not sql.inRow(tn, data):
+                sql.insert(tn, data)
+                sql.nnfKey("nom", name, tn, data, rel_tn)
+
+
+        # processing of values in the primary table
+        elif "Nom." in admin_data.convert(raw_TN):
+
+            column_name = admin_data.convert(raw_TN).replace("Nom.", "").lower()
+            # print(column_name, data)
+
+            try:
+                data = int(data.strip(" cm").strip(" au m²"))
+                if not sql.inColumn("nom", column_name):
+                    sql.createCol("nom", column_name, "INT", "UNSIGNED")
+                    sql.update("nom", name, column_name, data)
+
+            except ValueError:
+                if not sql.inColumn("nom", column_name):
+                    sql.createCol("nom", column_name, "VARCHAR(100)")
+                    if column_name in ["taille_conseille"
+                                       "mellifere"]:
+                        sql.update("nom", name, column_name, "oui")
+                    else:
+                        sql.update("nom", name, column_name, data)
         else:
-            print("singleTable")
+            # Get the relation table name too.
+            tn = admin_data.convert(raw_TN).lower()
+
+            if not sql.inTable(tn):
+                sql.createTable(tn)
+                sql.createCol(tn, "valeur", "VARCHAR(100)")
+
+            # If value is list type
+            if isinstance(data, list):
+                t = []
+                # check if each value not already in table
+                for v in data:
+                    if not sql.inRow(tn, v):
+                        t.append(v)
+                # Each data not in table append in list and reaffect to data var
+                data = t
+                if len(data) > 0:
+                    sql.insert(tn, data)
+                    for value in data:
+                        sql.fKey("nom", name, tn, value)
+            elif not sql.inRow(tn, data):
+                sql.insert(tn, data)
+                sql.fKey("nom", name, tn, data)

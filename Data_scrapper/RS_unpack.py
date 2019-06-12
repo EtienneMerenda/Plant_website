@@ -6,7 +6,7 @@ import pickle
 quest = ""
 move = ""
 
-with open("rosetta_stone.dic", "rb") as file:
+with open("RS.dic", "rb") as file:
     RS = pickle.load(file)
 
 pprint(RS)

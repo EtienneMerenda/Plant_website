@@ -33,8 +33,9 @@ class MySQLAdministrator:
     def createDB(self, namedb):
         """Method used to create a new database."""
 
-        print("------", namedb)
+        #print("------", namedb)
         namedb = namedb.lower()
+        self.dbName = namedb
         if namedb not in self.checkDB():
             self.myCursor.execute(f"CREATE DATABASE {namedb} CHARACTER SET utf8;")
             self.myCursor.execute(f"USE {namedb};")
@@ -53,7 +54,6 @@ class MySQLAdministrator:
         """Method used to check existing database."""
 
         self.myCursor.execute("SHOW DATABASES;")
-        print("Burn after reading")
         for dataBase in self.myCursor:
             if self.dataBaseList.count(dataBase[0]) == 0:
                 self.dataBaseList.append(dataBase[0])
@@ -64,15 +64,15 @@ class MySQLAdministrator:
 
     def createTable(self, name):
         """Method used to create a new tab with id column."""
-        print(name, "table created")
+        #print(name, "table created")
         self.myCursor.execute(f"CREATE TABLE IF NOT EXISTS `{name}`"
                               f" (`id` INT UNSIGNED NOT NULL AUTO_INCREMENT,"
                               f" PRIMARY KEY (`id`))")
 
-    def createRelTable(self, primT, childT, tableName=""):
+    def createRelTable(self, primaryTable, childTable, tableName=""):
         """Create an relationnel table.
-        primT: primary table
-        childT: child table
+        primaryTable: primary table
+        childTable: child table
         tableName: relation table name's (optional)"""
 
         self.myCursor.execute("SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0;")
@@ -81,39 +81,39 @@ class MySQLAdministrator:
 
         if tableName == "":
 
-            self.myCursor.execute(f"CREATE TABLE IF NOT EXISTS `{primT}_has_{childT}` ("
-                                    f"`{primT}_id` INT UNSIGNED NOT NULL, "
-                                    f"`{childT}_id` INT UNSIGNED NOT NULL, "
-                                    f"PRIMARY KEY (`{primT}_id`, `{childT}_id`), "
-                                    f"INDEX `fk_{primT}_has_{childT}_{childT}_idx` (`{childT}_id` ASC) VISIBLE, "
-                                    f"INDEX `fk_{primT}_has_{childT}_{primT}_idx` (`{primT}_id` ASC) VISIBLE, "
-                                    f"CONSTRAINT `fk_{primT}_has_{childT}_{primT}` "
-                                      f"FOREIGN KEY (`{primT}_id`) "
-                                      f"REFERENCES `{self.dbName}`.`{primT}` (`id`) "
+            self.myCursor.execute(f"CREATE TABLE IF NOT EXISTS `{primaryTable}_has_{childTable}` ("
+                                    f"`{primaryTable}_id` INT UNSIGNED NOT NULL, "
+                                    f"`{childTable}_id` INT UNSIGNED NOT NULL, "
+                                    f"PRIMARY KEY (`{primaryTable}_id`, `{childTable}_id`), "
+                                    f"INDEX `fk_{primaryTable}_has_{childTable}_{childTable}_idx` (`{childTable}_id` ASC) VISIBLE, "
+                                    f"INDEX `fk_{primaryTable}_has_{childTable}_{primaryTable}_idx` (`{primaryTable}_id` ASC) VISIBLE, "
+                                    f"CONSTRAINT `fk_{primaryTable}_has_{childTable}_{primaryTable}` "
+                                      f"FOREIGN KEY (`{primaryTable}_id`) "
+                                      f"REFERENCES `{self.dbName}`.`{primaryTable}` (`id`) "
                                       f"ON DELETE NO ACTION "
                                       f"ON UPDATE NO ACTION, "
-                                    f"CONSTRAINT `fk_{primT}_has_{childT}_{childT}` "
-                                      f"FOREIGN KEY (`{childT}_id`) "
-                                      f"REFERENCES `{self.dbName}`.`{childT}` (`id`) "
+                                    f"CONSTRAINT `fk_{primaryTable}_has_{childTable}_{childTable}` "
+                                      f"FOREIGN KEY (`{childTable}_id`) "
+                                      f"REFERENCES `{self.dbName}`.`{childTable}` (`id`) "
                                       f"ON DELETE NO ACTION "
                                       f"ON UPDATE NO ACTION) "
                                   "ENGINE = InnoDB;")
 
         else:
             self.myCursor.execute(f"CREATE TABLE IF NOT EXISTS `{tableName}` ("
-                                    f"`{primT}_id` INT UNSIGNED NOT NULL, "
-                                    f"`{childT}_id` INT UNSIGNED NOT NULL, "
-                                    f"PRIMARY KEY (`{primT}_id`, `{childT}_id`), "
-                                    f"INDEX `fk_{primT}_has_{childT}_{childT}_idx` (`{childT}_id` ASC) VISIBLE, "
-                                    f"INDEX `fk_{primT}_has_{childT}_{primT}_idx` (`{primT}_id` ASC) VISIBLE, "
-                                    f"CONSTRAINT `fk_{primT}_has_{childT}_{childT}` "
-                                      f"FOREIGN KEY (`{primT}_id`) "
-                                      f"REFERENCES `{self.dbName}`.`{primT}` (`id`) "
+                                    f"`{primaryTable}_id` INT UNSIGNED NOT NULL, "
+                                    f"`{childTable}_id` INT UNSIGNED NOT NULL, "
+                                    f"PRIMARY KEY (`{primaryTable}_id`, `{childTable}_id`), "
+                                    f"INDEX `fk_{tableName}_{childTable}_idx` (`{childTable}_id` ASC) VISIBLE, "
+                                    f"INDEX `fk_{tableName}_{primaryTable}_idx` (`{primaryTable}_id` ASC) VISIBLE, "
+                                    f"CONSTRAINT `fk_{tableName}_{primaryTable}` "
+                                      f"FOREIGN KEY (`{primaryTable}_id`) "
+                                      f"REFERENCES `{self.dbName}`.`{primaryTable}` (`id`) "
                                       f"ON DELETE NO ACTION "
                                       f"ON UPDATE NO ACTION, "
-                                    f"CONSTRAINT `fk_{primT}_has_{childT}_{childT}` "
-                                      f"FOREIGN KEY (`{childT}_id`) "
-                                      f"REFERENCES `{self.dbName}`.`{childT}` (`id`) "
+                                    f"CONSTRAINT `fk_{tableName}_{childTable}` "
+                                      f"FOREIGN KEY (`{childTable}_id`) "
+                                      f"REFERENCES `{self.dbName}`.`{childTable}` (`id`) "
                                       f"ON DELETE NO ACTION "
                                       f"ON UPDATE NO ACTION) "
                                   "ENGINE = InnoDB;")
@@ -154,27 +154,96 @@ class MySQLAdministrator:
     def insert(self, tableName, value, columnName=None):
         """Method used to insert a or many records in the table."""
 
-        print(tableName)
-        print(value)
+        print("insert: ", tableName, value)
 
         if columnName is None:
             columnName = self.checkColumn(tableName)[1]
-        print(columnName)
-        if isinstance(value, list) is False:
+        if isinstance(value, list) is False and isinstance(value, tuple) is False:
+            print(f'INSERT INTO {tableName} (`{columnName}`) VALUES ("{value}")')
             self.myCursor.execute(f'INSERT INTO {tableName} (`{columnName}`) VALUES ("{value}")')
+            self.mydb.commit()
+            print(self.myCursor.rowcount, f"record(s) inserted in '{tableName}': {value}")
 
         else:
-            for values in value:
-                self.myCursor.execute(f'INSERT INTO {tableName.lower()} (`{columnName}`) VALUES ("{values}")')
+            if isinstance(value, list):
+                if isinstance(value[0], list):
+                    n = len(value[0])
+                else:
+                    n = 0
+                    value = [(i,) for i in value]
+            elif isinstance(value, str):
+                value = [(i,) for i in value]
+                n = len(value) - 1
+            if isinstance(columnName, tuple) or isinstance(columnName, list):
+                columnName = f"{'`, `'.join(columnName)}"
+                print(columnName)
+                n = len(value[0]) - 1
 
-    def checkRows(self, table):
 
-        self.myCursor.execute(f"SELECT * FROM {table};")
-        return self.myCursor.fetchall()
+            cmd = f"INSERT INTO {tableName.lower()} (`{columnName}`) VALUES ({'%s'+(', %s'*n)})"
+            print(cmd, value, type(value[0]))
+            self.myCursor.executemany(cmd, value)
+            self.mydb.commit()
+            print(self.myCursor.rowcount, f"record(s) inserted in '{tableName}': {value}")
+
+    def update(self, tableName, valueRef, columnName, value):
+
+        valueRef = int(self.inRow(tableName, valueRef, "k"))
+
+        print(f"UPDATE {tableName} SET {columnName} = ('{value}') WHERE id = {valueRef}")
+        self.myCursor.execute(f"UPDATE {tableName} SET {columnName} = ('{value}') WHERE id = {valueRef}")
+        self.mydb.commit()
+        print(self.myCursor.rowcount, f"record(s) modified in '{tableName}' with '{value}'")
+
+    def fKey(self, primaryTable, valuePT, childTable, valueCT):
+
+        iP = int(self.inRow(primaryTable, valuePT, "k"))
+        iC = int(self.inRow(childTable, valueCT, "k"))
+
+        if not self.inColumn(primaryTable, f"{childTable}_id"):
+            self.createCol(primaryTable, f"{childTable}_id", "INT(10)", "UNSIGNED")
+        # print(f"UPDATE {primaryTable} SET {childTable}_id = {iC} WHERE {self.checkColumn(primaryTable)[0]} = {iP}")
+        self.myCursor.execute(f"UPDATE {primaryTable} SET {childTable}_id = {iC} WHERE {self.checkColumn(primaryTable)[0]} = {iP}")
+        self.mydb.commit()
+        print(self.myCursor.rowcount, f"key(s) was insered in '{primaryTable}' table.")
+
+    def nnfKey(self, primaryTable, valuePT, childTable, valueCT, altTableName=None):
+
+        if not self.inTable(primaryTable) or not self.inTable(childTable):
+            if not self.inTable(primaryTable):
+                raise ValueError(f"Table '{primaryTable}' not exist.")
+            else:
+                raise ValueError(f"Table '{childTable}' not exist.")
+
+        iP = self.inRow(primaryTable, valuePT, "k")
+        iC = self.inRow(childTable, valueCT, "k")
+
+        #print(iP, iC)
+        try:
+            if altTableName != None:
+                self.insert(f"{altTableName}", ((iP, iC),), (f"{primaryTable}_id", f"{childTable}_id"))
+            else:
+                print(f"{primaryTable}_has_{childTable}", (iP, iC), (f"{primaryTable}_id", f"{childTable}_id"))
+                self.insert(f"{primaryTable}_has_{childTable}", ((iP, iC),), (f"{primaryTable}_id", f"{childTable}_id"))
+        except mysql.connector.errors.IntegrityError as e:
+            print("Keys in many to many table not added: ", e)
+
+    def checkRows(self, table, value=""):
+
+        if value == "":
+            self.myCursor.execute(f"SELECT * FROM {table};")
+            row = self.myCursor.fetchall()
+            return row
+
+        else:
+            #print(1, f"SELECT * FROM {table} WHERE {self.checkColumn(table)[1]}='{value}'")
+            self.myCursor.execute(f"SELECT * FROM {table} WHERE {self.checkColumn(table)[1]}=%s", ((value,)))
+            row = self.myCursor.fetchall()
+            return row
 
 # ------------------------------------------------------------------------------
 
-    def checkInTable(self, name):
+    def inTable(self, name):
         """Return True if table already exist"""
 
         name = name.lower()
@@ -183,7 +252,7 @@ class MySQLAdministrator:
         else:
             return False
 
-    def checkInColumns(self, name, tableName):
+    def inColumn(self, tableName, name):
         """Return True if column already exist"""
 
         name = name.lower()
@@ -192,13 +261,14 @@ class MySQLAdministrator:
         else:
             return False
 
-    def checkInRow(self, value, tableName):
-        """Return True if value is in row"""
+    def inRow(self, tableName, value, p=False):
+        """Return True if value is in row.
+        If p = "k", return key of id row"""
 
-        print(value)
-        print(self.checkRows(tableName))
-
-        if value in [i[1] for i in self.checkRows(tableName)]:
-            return True
+        if len(self.checkRows(tableName, value)) > 0:
+            if p is False:
+                return True
+            elif p == "k":
+                return self.checkRows(tableName, value)[0][0]
         else:
             return False
