@@ -11,19 +11,26 @@ from scrap import scrap
 # function used for convert table name, create table and inject data in DB
 from inject import inject
 
+import pickle
+
 linkDict = {}
 
-with open("../Link_scrapper/all_link.txt", "r", encoding="utf-8") as file:
-    for link in file.readlines():
-        if len(link) > 6 and len(link) < 20:
-            category = link.strip("\n")
-            linkDict[category] = []
-        if len(link) > 20:
-            linkDict[category].append(link.strip("\n"))
+try:
+    with open("do.py", "rb") as file:
+        linkDict = pickle.load(file)
+except FileNotFoundError:
+    with open("../Link_scrapper/all_link.txt", "r", encoding="utf-8") as file:
+        for link in file.readlines():
+            if len(link) > 6 and len(link) < 20:
+                category = link.strip("\n")
+                linkDict[category] = []
+            if len(link) > 20:
+                linkDict[category].append(link.strip("\n"))
 
 for key in linkDict.keys():
-
-    for link in linkDict[key]:
+    i = len(linkDict[key]) - 1
+    while i > 0:
+        link = linkDict[key][i]
         print(link)
         # Object will contains scrap data.
         plant = Plant()
@@ -34,7 +41,16 @@ for key in linkDict.keys():
         conv.rosetta_stone()
 
         scrap(link, plant, conv)
-        inject(plant, conv)
+        if "mélange" in plant.name or "melange" in plant.name or \
+           "Mélange" in plant.name or "Melange" in plant.name:
+            print(len(linkDict), len(linkDict[key]))
+            del linkDict[key][i]
+        else:
+            inject(plant, conv)
+            print(len(linkDict), len(linkDict[key]))
+            del linkDict[key][i]
 
-        with open("do.txt", "a", encoding="utf-8") as file:
-            file.write(link+"\n")
+        i -= 1
+
+        with open("do.py", "wb") as file:
+            file.write(pickle.dumps(linkDict))

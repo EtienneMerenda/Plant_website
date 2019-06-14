@@ -159,12 +159,10 @@ class MySQLAdministrator:
     def insert(self, tableName, value, columnName=None):
         """Method used to insert a or many records in the table."""
 
-        print("insert: ", tableName, value)
-
         if columnName is None:
             columnName = self.checkColumn(tableName)[1]
         if isinstance(value, list) is False and isinstance(value, tuple) is False:
-            print(f'INSERT INTO {tableName} (`{columnName}`) VALUES ("{value}")')
+            # print(f'INSERT INTO {tableName} (`{columnName}`) VALUES ("{value}")')
             self.myCursor.execute(f'INSERT INTO {tableName} (`{columnName}`) VALUES ("{value}")')
             self.mydb.commit()
             print(self.myCursor.rowcount, f"record(s) inserted in '{tableName}': {value}")
@@ -181,12 +179,11 @@ class MySQLAdministrator:
                 n = len(value) - 1
             if isinstance(columnName, tuple) or isinstance(columnName, list):
                 columnName = f"{'`, `'.join(columnName)}"
-                print(columnName)
                 n = len(value[0]) - 1
 
 
             cmd = f"INSERT INTO {tableName.lower()} (`{columnName}`) VALUES ({'%s'+(', %s'*n)})"
-            print(cmd, value, type(value[0]))
+            # print(cmd, value, type(value[0]))
             self.myCursor.executemany(cmd, value)
             self.mydb.commit()
             print(self.myCursor.rowcount, f"record(s) inserted in '{tableName}': {value}")
@@ -195,7 +192,7 @@ class MySQLAdministrator:
 
         valueRef = int(self.inRow(tableName, valueRef, "k"))
 
-        print(f"UPDATE {tableName} SET {columnName} = ('{value}') WHERE id = {valueRef}")
+        # print(f"UPDATE {tableName} SET {columnName} = ('{value}') WHERE id = {valueRef}")
         self.myCursor.execute(f"UPDATE {tableName} SET {columnName} = ('{value}') WHERE id = {valueRef}")
         self.mydb.commit()
         print(self.myCursor.rowcount, f"record(s) modified in '{tableName}' with '{value}'")
@@ -228,7 +225,7 @@ class MySQLAdministrator:
             if altTableName != None:
                 self.insert(f"{altTableName}", ((iP, iC),), (f"{primaryTable}_id", f"{childTable}_id"))
             else:
-                print(f"{primaryTable}_has_{childTable}", (iP, iC), (f"{primaryTable}_id", f"{childTable}_id"))
+                # print(f"{primaryTable}_has_{childTable}", (iP, iC), (f"{primaryTable}_id", f"{childTable}_id"))
                 self.insert(f"{primaryTable}_has_{childTable}", ((iP, iC),), (f"{primaryTable}_id", f"{childTable}_id"))
         except mysql.connector.errors.IntegrityError as e:
             print("Keys in many to many table not added: ", e)

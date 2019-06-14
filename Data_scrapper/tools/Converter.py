@@ -18,7 +18,8 @@ class Converter():
             with open("./RS/RS.dic", "rb") as file:
                 self.RS = pickle.load(file)
                 self.date = self.RS["_date"]
-        except EOFError:
+        except EOFError as e:
+            print(e)
             self.RS = {'arrosage': 'Nom_has_Arrosage',
                        'autres_noms_communs': 'Nom_has_Autre_nom',
                        'climat_de_preference': 'Nom_has_climat',

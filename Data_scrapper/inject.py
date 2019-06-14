@@ -26,19 +26,26 @@ def inject(plant, conv):
 
     for raw_TN, data in plant.get_all().items():
 
-        print(raw_TN, data)
+        # print(raw_TN, data)
         # We skip useless data: cultivar
         if raw_TN not in conv.ignored():
 
             #print("\n", raw_TN, conv.convert(raw_TN), data, "\n")
 
+            if raw_TN == "name":
+                pass
+
             # We work in Name to other table multi-relations.
-            if "Nom_has" in conv.convert(raw_TN):
+            elif "Nom_has" in conv.convert(raw_TN):
 
                 # Get the relation table name too.
                 rel_tn = conv.convert(raw_TN).lower()
                 # Get table_name in RS dict
                 tn = rel_tn.replace("nom_has_", "")
+
+                if len(data) > 99:
+                    # print(sql.checkRows(tn))
+                    data = input(data)
 
                 # if the table not exist, we create it.
                 if not sql.inTable(tn):
@@ -132,18 +139,39 @@ def inject(plant, conv):
                                               f"ON UPDATE NO ACTION) "
                                             f"ENGINE = InnoDB;")
 
-                #print("after", data)
-                iP = [sql.inRow("nom", plant.name, "k")]
-                #print(iP)
-                data = (tuple(iP + data),)
-                #print(data)
+                # Format date for insert in relational table row.
+                iP = sql.inRow("nom", plant.name, "k")
 
-                if len(data[0]) == 2:
-                    data = ((data[0][0], data[0][1], data[0][1],),)
-                elif len(data[0]) == 4:
-                    data = ((data[0][0], data[0][1], data[0][2],), ((data[0][0], data[0][3], data[0][3],)),)
-                elif len(data[0]) == 5:
-                    data = ((data[0][0], data[0][1], data[0][2],), ((data[0][0], data[0][3], data[0][4],)),)
+                if len(data) % 2 == 0:
+
+                    final_list_tuple = []
+                    list_tuple = [iP]
+                    for date_index in data:
+                        list_tuple.append(date_index)
+                        if len(list_tuple) == 3:
+                            final_list_tuple.append(tuple(list_tuple))
+                            list_tuple = [iP]
+
+                    data = tuple(final_list_tuple)
+
+                elif not len(data) % 2 == 0:
+
+                    i = len(data)
+
+                    final_list_tuple = []
+                    list_tuple = [iP]
+                    for date_index in data:
+                        i -= 1
+                        list_tuple.append(date_index)
+                        if len(list_tuple) == 3:
+                            final_list_tuple.append(tuple(list_tuple))
+                            list_tuple = [iP]
+
+                        elif i == 0:
+                            list_tuple.append(date_index)
+                            final_list_tuple.append(tuple(list_tuple))
+
+                    data = tuple(final_list_tuple)
 
                 try:
                     sql.insert(rel_tn, data, ("nom_id", "date_start_id", "date_end_id"))
@@ -193,7 +221,7 @@ def inject(plant, conv):
 
                 column_name = conv.convert(raw_TN).replace("Nom.", "").lower()
                 try:
-                    data = int(data.strip(" cm").strip(" au m²").strip(" jours"))
+                    data = float(data.strip(" cm").strip(" au m²").strip(" jours"))
                     if not sql.inColumn("nom", column_name):
                         sql.createCol("nom", column_name, "INT", "UNSIGNED")
                         sql.update("nom", plant.name, column_name, data)
@@ -209,16 +237,22 @@ def inject(plant, conv):
                         else:
                             sql.update("nom", plant.name, column_name, data)
                     else:
-                        sql.update("nom", plant.name, column_name, data)
+                        if column_name in ["taille_conseille"
+                                           "mellifere"]:
+                            sql.update("nom", plant.name, column_name, "oui")
+                        else:
+                            sql.update("nom", plant.name, column_name, data)
 
             else:
                 # Get the relation table name too.
                 tn = conv.convert(raw_TN).lower()
 
-                if tn in ["soins", "Soins"]:
+                if "info" in tn:
                     if not sql.inTable(tn):
                         sql.createTable(tn)
-                        sql.createCol(tn, "valeur", "VARCHAR(500)")
+                        sql.createCol(tn, "valeur", "TEXT")
+
+                    # data = data.replace('"', "''")
 
                 if not sql.inTable(tn):
                     sql.createTable(tn)
@@ -238,7 +272,7 @@ def inject(plant, conv):
                         for value in data:
                             sql.fKey("nom", plant.name, tn, value)
                 elif not sql.inRow(tn, data):
-                    sql.insert(tn, data)
+                    sql.insert(tn, data.replace('"', '\"'))
                     sql.fKey("nom", plant.name, tn, data)
                 else:
                     sql.fKey("nom", plant.name, tn, data)
